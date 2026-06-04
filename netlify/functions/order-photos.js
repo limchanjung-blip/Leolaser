@@ -44,13 +44,14 @@ exports.handler = async (event) => {
 
     const timestamp = Math.floor(Date.now() / 1000);
     // 서명 대상 (알파벳순): command, context, public_ids, timestamp
-    const toSign = `command=add&context=${contextStr}&public_ids[]=${publicId}&timestamp=${timestamp}${SECRET}`;
+    // ※ 전송 필드명도 public_ids 로 통일 (대괄호 쓰면 서명 불일치 발생)
+    const toSign = `command=add&context=${contextStr}&public_ids=${publicId}&timestamp=${timestamp}${SECRET}`;
     const signature = crypto.createHash('sha1').update(toSign).digest('hex');
 
     const form = new URLSearchParams();
     form.append('command', 'add');
     form.append('context', contextStr);
-    form.append('public_ids[]', publicId);
+    form.append('public_ids', publicId);
     form.append('timestamp', String(timestamp));
     form.append('api_key', KEY);
     form.append('signature', signature);
