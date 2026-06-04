@@ -1815,8 +1815,14 @@
   .gm-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap: 0.5rem; margin-bottom: 1rem; }
   .gm-manage-label { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--ink); margin: 0.4rem 0 0.7rem; }
   .gm-manage-label small { display: block; color: var(--ink-dim); font-size: 0.62rem; margin-top: 0.25rem; line-height: 1.4; }
-  .gm-thumb { position: relative; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 3px; transition: border-color .25s; }
+  .gm-thumb { position: relative; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 3px; transition: border-color .25s, opacity .2s, transform .2s; cursor: grab; }
   .gm-thumb:hover { border-color: var(--laser); }
+  .gm-thumb.dragging { opacity: 0.4; cursor: grabbing; }
+  .gm-thumb.drop-target { border-color: var(--laser); box-shadow: 0 0 0 2px var(--laser); }
+  .gm-order-num { position: absolute; top: 3px; left: 3px; z-index: 2; background: rgba(0,0,0,0.65); color: var(--laser); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; padding: 1px 5px; border-radius: 2px; pointer-events: none; }
+  .gm-order-save { display: none; margin: 0.9rem 0 0; width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.12em; padding: 0.8rem; border: 1px solid var(--laser); border-radius: 3px; background: rgba(255,56,21,0.12); color: var(--laser); cursor: pointer; text-transform: uppercase; transition: background .25s; }
+  .gm-order-save:hover { background: rgba(255,56,21,0.25); }
+  .gm-order-save.show { display: block; }
   .gm-thumb img { width: 100%; height: 100%; object-fit: cover; transition: opacity .25s; }
   .gm-thumb:hover img { opacity: 0.55; }
   .gm-thumb .gm-del { position: absolute; inset: 0; margin: auto; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,56,21,0.95); color: #fff; font-size: 1.1rem; line-height: 1; cursor: pointer; opacity: 0; transition: opacity .25s, transform .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
@@ -2251,8 +2257,9 @@
         <div class="gm-drop-txt">여기로 사진을 끌어다 놓거나 눌러서 선택<br><small>여러 장 한꺼번에 가능</small></div>
       </div>
       <input type="file" id="gmFile" accept="image/*" multiple style="display:none">
-      <div class="gm-manage-label" id="gmManageLabel">올린 사진 <small>· 사진 위에 마우스(또는 터치)하면 나오는 × 를 누르면 완전 삭제됩니다</small></div>
+      <div class="gm-manage-label" id="gmManageLabel">올린 사진 <small>· 사진을 끌어서 순서를 바꾸고 [순서 저장]을 누르세요 · × 를 누르면 완전 삭제됩니다</small></div>
       <div class="gm-thumbs" id="gmThumbs"></div>
+      <button class="gm-order-save" id="gmOrderSave" style="display:none;">순서 저장</button>
       <div class="gm-msg" id="gmMsg"></div>
     </div>
   </div>
@@ -3051,16 +3058,35 @@
     }
 
     // ── 태그 목록 불러와서 화면에 표시 (모든 손님이 같은 사진을 봄) ──
+    const ORDER_URL = 'https://res.cloudinary.com/' + CLOUD + '/raw/upload/leo_gallery_order';
     function loadList() {
-      fetch(LIST_URL + '?t=' + Date.now()).then(r => r.ok ? r.json() : { resources: [] }).then(data => {
-        const res = (data && data.resources) ? data.resources : [];
-        // 최신 업로드가 뒤로 가도록 정렬 (created_at 또는 version 기준)
-        res.sort((a, b) => (a.created_at || a.version || 0) > (b.created_at || b.version || 0) ? 1 : -1);
-        res.forEach(r => {
-          const url = 'https://res.cloudinary.com/' + CLOUD + '/image/upload/v' + r.version + '/' + r.public_id + '.' + r.format;
-          addCard({ pid: r.public_id, url: url });
+      // 1) 저장된 순서 먼저 읽기 (없으면 빈 배열)
+      fetch(ORDER_URL + '?t=' + Date.now())
+        .then(r => r.ok ? r.json() : [])
+        .catch(() => [])
+        .then(savedOrder => {
+          const orderArr = Array.isArray(savedOrder) ? savedOrder : [];
+          // 2) 사진 목록 읽기
+          fetch(LIST_URL + '?t=' + Date.now()).then(r => r.ok ? r.json() : { resources: [] }).then(data => {
+            const res = (data && data.resources) ? data.resources : [];
+            // 기본 정렬: 업로드 시간순 (순서 정보 없는 새 사진은 뒤로)
+            res.sort((a, b) => (a.created_at || a.version || 0) > (b.created_at || b.version || 0) ? 1 : -1);
+            // 저장된 순서가 있으면 그 순서를 우선 적용
+            if (orderArr.length) {
+              const idx = {};
+              orderArr.forEach((pid, i) => { idx[pid] = i; });
+              res.sort((a, b) => {
+                const ai = (a.public_id in idx) ? idx[a.public_id] : 9999;
+                const bi = (b.public_id in idx) ? idx[b.public_id] : 9999;
+                return ai - bi;
+              });
+            }
+            res.forEach(r => {
+              const url = 'https://res.cloudinary.com/' + CLOUD + '/image/upload/v' + r.version + '/' + r.public_id + '.' + r.format;
+              addCard({ pid: r.public_id, url: url });
+            });
+          }).catch(() => {});
         });
-      }).catch(() => {});
     }
 
     // ── 사진 업로드 (태그를 붙여서 올림 → 모든 손님이 봄) ──
@@ -3084,16 +3110,99 @@
       next(0);
     }
 
-    // ── 관리 팝업 안의 썸네일(삭제 가능) 추가 ──
+    // ── 관리 팝업 안의 썸네일(삭제 가능 + 드래그 정렬) 추가 ──
+    const gmOrderSave = document.getElementById('gmOrderSave');
+    let dragEl = null;
+
+    function renumberThumbs() {
+      const ths = [...gmThumbs.querySelectorAll('.gm-thumb')];
+      ths.forEach((t, i) => {
+        let num = t.querySelector('.gm-order-num');
+        if (!num) { num = document.createElement('span'); num.className = 'gm-order-num'; t.insertBefore(num, t.firstChild); }
+        num.textContent = String(i + 1).padStart(2, '0');
+      });
+      // 사진이 2장 이상일 때만 순서 저장 버튼 보이기
+      gmOrderSave.classList.toggle('show', ths.length >= 2);
+    }
+
     function addThumb(photo) {
       const t = document.createElement('div');
       t.className = 'gm-thumb';
       t.dataset.pid = photo.pid;
-      t.innerHTML = '<img src="' + photo.url + '" alt=""><button class="gm-del" title="빼기">×</button>';
+      t.setAttribute('draggable', 'true');
+      t.innerHTML = '<img src="' + photo.url + '" alt="" draggable="false"><button class="gm-del" title="빼기">×</button>';
       t.querySelector('.gm-del').addEventListener('click', () => removePhoto(photo.pid));
+
+      // ── PC 마우스 드래그 ──
+      t.addEventListener('dragstart', (e) => {
+        dragEl = t; t.classList.add('dragging');
+        try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', photo.pid); } catch(_){}
+      });
+      t.addEventListener('dragend', () => {
+        t.classList.remove('dragging');
+        gmThumbs.querySelectorAll('.drop-target').forEach(x => x.classList.remove('drop-target'));
+        dragEl = null; renumberThumbs();
+      });
+      t.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!dragEl || dragEl === t) return;
+        const ths = [...gmThumbs.querySelectorAll('.gm-thumb')];
+        if (ths.indexOf(dragEl) < ths.indexOf(t)) gmThumbs.insertBefore(dragEl, t.nextSibling);
+        else gmThumbs.insertBefore(dragEl, t);
+      });
+
+      // ── 모바일 터치 드래그 ──
+      let touchTimer = null;
+      t.addEventListener('touchstart', (e) => {
+        touchTimer = setTimeout(() => { dragEl = t; t.classList.add('dragging'); }, 180);
+      }, { passive: true });
+      t.addEventListener('touchmove', (e) => {
+        if (!dragEl) { clearTimeout(touchTimer); return; }
+        e.preventDefault();
+        const touch = e.touches[0];
+        const over = document.elementFromPoint(touch.clientX, touch.clientY);
+        const overThumb = over && over.closest ? over.closest('.gm-thumb') : null;
+        if (overThumb && overThumb !== dragEl && gmThumbs.contains(overThumb)) {
+          const ths = [...gmThumbs.querySelectorAll('.gm-thumb')];
+          if (ths.indexOf(dragEl) < ths.indexOf(overThumb)) gmThumbs.insertBefore(dragEl, overThumb.nextSibling);
+          else gmThumbs.insertBefore(dragEl, overThumb);
+        }
+      }, { passive: false });
+      t.addEventListener('touchend', () => {
+        clearTimeout(touchTimer);
+        if (dragEl) { dragEl.classList.remove('dragging'); dragEl = null; renumberThumbs(); }
+      });
+
       gmThumbs.appendChild(t);
       var lbl = document.getElementById('gmManageLabel'); if (lbl) lbl.style.display = '';
+      renumberThumbs();
     }
+
+    // ── 순서 저장 ──
+    gmOrderSave.addEventListener('click', () => {
+      const order = [...gmThumbs.querySelectorAll('.gm-thumb')].map(t => t.dataset.pid);
+      if (!order.length) return;
+      gmOrderSave.disabled = true;
+      gmMsg.textContent = '순서 저장 중...';
+      fetch('/.netlify/functions/order-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: order, pw: PW })
+      }).then(r => r.json()).then(res => {
+        gmOrderSave.disabled = false;
+        if (res && res.ok) {
+          dirty = true;
+          gmMsg.textContent = '✓ 순서 저장 완료! (닫으면 새로고침)';
+        } else {
+          gmMsg.textContent = '순서 저장 실패: ' + ((res && res.error) || '');
+        }
+        setTimeout(() => gmMsg.textContent = '', 5000);
+      }).catch(() => {
+        gmOrderSave.disabled = false;
+        gmMsg.textContent = '순서 저장 실패 (연결 오류)';
+        setTimeout(() => gmMsg.textContent = '', 5000);
+      });
+    });
 
     // ── 사진 빼기 (화면+팝업에서 제거) ──
     function removePhoto(pid) {
@@ -3111,6 +3220,7 @@
           if (card) card.remove();
           if (thumb) thumb.remove();
           var lbl = document.getElementById('gmManageLabel'); if (lbl && !gmThumbs.querySelector('.gm-thumb')) lbl.style.display = 'none';
+          renumberThumbs();
           refreshItems();
           dirty = true;
           gmMsg.textContent = '✓ 완전 삭제됨';
@@ -3127,6 +3237,7 @@
       gmAuth.classList.remove('gm-hide');
       gmPanel.classList.add('gm-hide');
       gmPw.value = ''; gmAuthMsg.textContent = ''; gmMsg.textContent = '';
+      gmOrderSave.disabled = false; gmOrderSave.classList.remove('show');
       document.documentElement.classList.remove('laser-on');
       setTimeout(() => gmPw.focus(), 100);
     }
