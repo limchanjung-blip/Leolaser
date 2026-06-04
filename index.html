@@ -3192,11 +3192,12 @@
         gmOrderSave.disabled = false;
         if (res && res.ok) {
           dirty = true;
-          gmMsg.textContent = '✓ 순서 저장 완료! (닫으면 새로고침)';
+          gmMsg.textContent = '✓ 순서 저장 완료!';
+          setTimeout(() => closeModal(), 400);
         } else {
           gmMsg.textContent = '순서 저장 실패: ' + ((res && res.error) || '');
+          setTimeout(() => gmMsg.textContent = '', 5000);
         }
-        setTimeout(() => gmMsg.textContent = '', 5000);
       }).catch(() => {
         gmOrderSave.disabled = false;
         gmMsg.textContent = '순서 저장 실패 (연결 오류)';

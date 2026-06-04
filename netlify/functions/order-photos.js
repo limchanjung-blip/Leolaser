@@ -1,5 +1,5 @@
 // LEOLASER 갤러리 사진 순서 저장 처리기 (Netlify Function)
-// 순서 목록을 Cloudinary raw 파일(leo_gallery_order)에 통째로 저장
+// 순서 목록을 Cloudinary raw 파일(leo_gallery_order.json)로 저장
 // 비밀키는 Netlify 환경변수에만 저장됨 (브라우저에 노출 안 됨)
 const crypto = require('crypto');
 
@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ ok: false, error: 'bad request' }) };
   }
 
-  const order = data.order;   // [public_id, public_id, ...] 순서대로
+  const order = data.order;
   const pw = data.pw;
 
   const CLOUD = process.env.CLOUDINARY_CLOUD_NAME;
@@ -33,37 +33,50 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ ok: false, error: '서버 설정 누락' }) };
   }
 
-  // 순서 목록을 JSON 문자열로 만들어 raw 파일로 업로드 (덮어쓰기)
   const PUBLIC_ID = 'leo_gallery_order';
   const content = JSON.stringify(order);
-  // data URI 형태로 raw 업로드
-  const fileData = 'data:application/json;base64,' + Buffer.from(content, 'utf8').toString('base64');
-
   const timestamp = Math.floor(Date.now() / 1000);
-  // 서명 대상: invalidate, overwrite, public_id, timestamp (알파벳순)
-  const toSign = `invalidate=true&overwrite=true&public_id=${PUBLIC_ID}&timestamp=${timestamp}${SECRET}`;
+
+  // 서명 대상 파라미터 (file, api_key, signature 제외 / 알파벳순)
+  // overwrite, public_id, timestamp
+  const toSign = `overwrite=true&public_id=${PUBLIC_ID}&timestamp=${timestamp}${SECRET}`;
   const signature = crypto.createHash('sha1').update(toSign).digest('hex');
 
-  const form = new URLSearchParams();
-  form.append('file', fileData);
-  form.append('public_id', PUBLIC_ID);
-  form.append('overwrite', 'true');
-  form.append('invalidate', 'true');
-  form.append('timestamp', String(timestamp));
-  form.append('api_key', KEY);
-  form.append('signature', signature);
+  // multipart/form-data 로 전송 (raw 업로드는 file 필드 필요)
+  const boundary = '----leoFormBoundary' + Date.now();
+  const parts = [];
+  const addField = (name, value) => {
+    parts.push(`--${boundary}\r\n`);
+    parts.push(`Content-Disposition: form-data; name="${name}"\r\n\r\n`);
+    parts.push(`${value}\r\n`);
+  };
+  // file 필드: 파일 내용 직접 첨부
+  parts.push(`--${boundary}\r\n`);
+  parts.push(`Content-Disposition: form-data; name="file"; filename="leo_gallery_order.json"\r\n`);
+  parts.push(`Content-Type: application/json\r\n\r\n`);
+  parts.push(`${content}\r\n`);
+
+  addField('public_id', PUBLIC_ID);
+  addField('overwrite', 'true');
+  addField('timestamp', String(timestamp));
+  addField('api_key', KEY);
+  addField('signature', signature);
+  parts.push(`--${boundary}--\r\n`);
+
+  const bodyBuf = Buffer.from(parts.join(''), 'utf8');
 
   try {
     const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/raw/upload`, {
       method: 'POST',
-      body: form
+      headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` },
+      body: bodyBuf
     });
     const result = await resp.json();
     if (result && result.secure_url) {
-      return { statusCode: 200, body: JSON.stringify({ ok: true, count: order.length }) };
+      return { statusCode: 200, body: JSON.stringify({ ok: true, count: order.length, url: result.secure_url }) };
     }
-    return { statusCode: 200, body: JSON.stringify({ ok: false, error: (result && result.error && result.error.message) || '순서 저장 실패' }) };
+    return { statusCode: 200, body: JSON.stringify({ ok: false, error: (result && result.error && result.error.message) || JSON.stringify(result) }) };
   } catch (e) {
-    return { statusCode: 500, body: JSON.stringify({ ok: false, error: '클라우드 연결 실패' }) };
+    return { statusCode: 500, body: JSON.stringify({ ok: false, error: '클라우드 연결 실패: ' + e.message }) };
   }
 };
