@@ -1,6 +1,6 @@
 // LEOLASER 갤러리 사진 순서 저장 처리기 (Netlify Function)
-// 순서 목록을 Cloudinary raw 파일(leo_gallery_order.json)로 저장
-// 비밀키는 Netlify 환경변수에만 저장됨 (브라우저에 노출 안 됨)
+// 각 사진에 순서 번호(leo_order)를 Cloudinary context 메타데이터로 박음
+// → 삭제 기능(delete-photo)과 동일한 검증된 API 패턴 사용
 const crypto = require('crypto');
 
 exports.handler = async (event) => {
@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ ok: false, error: 'bad request' }) };
   }
 
-  const order = data.order;
+  const order = data.order;   // [public_id, public_id, ...] 순서대로
   const pw = data.pw;
 
   const CLOUD = process.env.CLOUDINARY_CLOUD_NAME;
@@ -26,57 +26,52 @@ exports.handler = async (event) => {
   if (!ADMIN_PW || pw !== ADMIN_PW) {
     return { statusCode: 403, body: JSON.stringify({ ok: false, error: '권한 없음' }) };
   }
-  if (!Array.isArray(order)) {
+  if (!Array.isArray(order) || order.length === 0) {
     return { statusCode: 400, body: JSON.stringify({ ok: false, error: '순서 목록 없음' }) };
   }
   if (!CLOUD || !KEY || !SECRET) {
     return { statusCode: 500, body: JSON.stringify({ ok: false, error: '서버 설정 누락' }) };
   }
 
-  const PUBLIC_ID = 'leo_gallery_order';
-  const content = JSON.stringify(order);
-  const timestamp = Math.floor(Date.now() / 1000);
+  // 각 사진에 context(leo_order=0001 ...) 한 장씩 저장
+  // delete-photo와 동일하게 URLSearchParams + sha1 서명 사용
+  const errors = [];
+  for (let i = 0; i < order.length; i++) {
+    const publicId = order[i];
+    if (!publicId) continue;
+    const orderVal = String(i + 1).padStart(4, '0');
+    const contextStr = 'leo_order=' + orderVal;
 
-  // 서명 대상 파라미터 (file, api_key, signature 제외 / 알파벳순)
-  // overwrite, public_id, timestamp
-  const toSign = `overwrite=true&public_id=${PUBLIC_ID}&timestamp=${timestamp}${SECRET}`;
-  const signature = crypto.createHash('sha1').update(toSign).digest('hex');
+    const timestamp = Math.floor(Date.now() / 1000);
+    // 서명 대상 (알파벳순): command, context, public_ids, timestamp
+    const toSign = `command=add&context=${contextStr}&public_ids[]=${publicId}&timestamp=${timestamp}${SECRET}`;
+    const signature = crypto.createHash('sha1').update(toSign).digest('hex');
 
-  // multipart/form-data 로 전송 (raw 업로드는 file 필드 필요)
-  const boundary = '----leoFormBoundary' + Date.now();
-  const parts = [];
-  const addField = (name, value) => {
-    parts.push(`--${boundary}\r\n`);
-    parts.push(`Content-Disposition: form-data; name="${name}"\r\n\r\n`);
-    parts.push(`${value}\r\n`);
-  };
-  // file 필드: 파일 내용 직접 첨부
-  parts.push(`--${boundary}\r\n`);
-  parts.push(`Content-Disposition: form-data; name="file"; filename="leo_gallery_order.json"\r\n`);
-  parts.push(`Content-Type: application/json\r\n\r\n`);
-  parts.push(`${content}\r\n`);
+    const form = new URLSearchParams();
+    form.append('command', 'add');
+    form.append('context', contextStr);
+    form.append('public_ids[]', publicId);
+    form.append('timestamp', String(timestamp));
+    form.append('api_key', KEY);
+    form.append('signature', signature);
 
-  addField('public_id', PUBLIC_ID);
-  addField('overwrite', 'true');
-  addField('timestamp', String(timestamp));
-  addField('api_key', KEY);
-  addField('signature', signature);
-  parts.push(`--${boundary}--\r\n`);
-
-  const bodyBuf = Buffer.from(parts.join(''), 'utf8');
-
-  try {
-    const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/raw/upload`, {
-      method: 'POST',
-      headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` },
-      body: bodyBuf
-    });
-    const result = await resp.json();
-    if (result && result.secure_url) {
-      return { statusCode: 200, body: JSON.stringify({ ok: true, count: order.length, url: result.secure_url }) };
+    try {
+      const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/context`, {
+        method: 'POST',
+        body: form
+      });
+      const result = await resp.json();
+      const ok = result && (Array.isArray(result.public_ids) ? result.public_ids.length > 0 : !!result.public_ids);
+      if (!ok) {
+        errors.push(publicId + ': ' + ((result && result.error && result.error.message) || JSON.stringify(result)));
+      }
+    } catch (e) {
+      errors.push(publicId + ': ' + e.message);
     }
-    return { statusCode: 200, body: JSON.stringify({ ok: false, error: (result && result.error && result.error.message) || JSON.stringify(result) }) };
-  } catch (e) {
-    return { statusCode: 500, body: JSON.stringify({ ok: false, error: '클라우드 연결 실패: ' + e.message }) };
   }
+
+  if (errors.length) {
+    return { statusCode: 200, body: JSON.stringify({ ok: false, error: errors.join(' | ') }) };
+  }
+  return { statusCode: 200, body: JSON.stringify({ ok: true, count: order.length }) };
 };

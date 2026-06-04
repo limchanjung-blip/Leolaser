@@ -3057,36 +3057,31 @@
       refreshItems();
     }
 
-    // ── 태그 목록 불러와서 화면에 표시 (모든 손님이 같은 사진을 봄) ──
-    const ORDER_URL = 'https://res.cloudinary.com/' + CLOUD + '/raw/upload/leo_gallery_order';
+    // ── 사진 목록 불러와서 화면에 표시 (모든 손님이 같은 순서로 봄) ──
     function loadList() {
-      // 1) 저장된 순서 먼저 읽기 (없으면 빈 배열)
-      fetch(ORDER_URL + '?t=' + Date.now())
-        .then(r => r.ok ? r.json() : [])
-        .catch(() => [])
-        .then(savedOrder => {
-          const orderArr = Array.isArray(savedOrder) ? savedOrder : [];
-          // 2) 사진 목록 읽기
-          fetch(LIST_URL + '?t=' + Date.now()).then(r => r.ok ? r.json() : { resources: [] }).then(data => {
-            const res = (data && data.resources) ? data.resources : [];
-            // 기본 정렬: 업로드 시간순 (순서 정보 없는 새 사진은 뒤로)
-            res.sort((a, b) => (a.created_at || a.version || 0) > (b.created_at || b.version || 0) ? 1 : -1);
-            // 저장된 순서가 있으면 그 순서를 우선 적용
-            if (orderArr.length) {
-              const idx = {};
-              orderArr.forEach((pid, i) => { idx[pid] = i; });
-              res.sort((a, b) => {
-                const ai = (a.public_id in idx) ? idx[a.public_id] : 9999;
-                const bi = (b.public_id in idx) ? idx[b.public_id] : 9999;
-                return ai - bi;
-              });
-            }
-            res.forEach(r => {
-              const url = 'https://res.cloudinary.com/' + CLOUD + '/image/upload/v' + r.version + '/' + r.public_id + '.' + r.format;
-              addCard({ pid: r.public_id, url: url });
-            });
-          }).catch(() => {});
+      // 1순위: 서버 Function (context의 순서번호까지 반영)
+      fetch('/.netlify/functions/list-photos?t=' + Date.now())
+        .then(r => r.ok ? r.json() : null)
+        .then(res => {
+          if (res && res.ok && Array.isArray(res.photos) && res.photos.length) {
+            res.photos.forEach(p => addCard({ pid: p.public_id, url: p.url }));
+          } else {
+            loadListFallback();
+          }
+        })
+        .catch(() => loadListFallback());
+    }
+
+    // 폴백: 공개 list.json (순서 정보 없이 업로드 시간순)
+    function loadListFallback() {
+      fetch(LIST_URL + '?t=' + Date.now()).then(r => r.ok ? r.json() : { resources: [] }).then(data => {
+        const res = (data && data.resources) ? data.resources : [];
+        res.sort((a, b) => (a.created_at || a.version || 0) > (b.created_at || b.version || 0) ? 1 : -1);
+        res.forEach(r => {
+          const url = 'https://res.cloudinary.com/' + CLOUD + '/image/upload/v' + r.version + '/' + r.public_id + '.' + r.format;
+          addCard({ pid: r.public_id, url: url });
         });
+      }).catch(() => {});
     }
 
     // ── 사진 업로드 (태그를 붙여서 올림 → 모든 손님이 봄) ──
