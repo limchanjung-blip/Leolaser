@@ -3162,7 +3162,13 @@
     ['dragenter', 'dragover'].forEach(ev => gmDrop.addEventListener(ev, (e) => { e.preventDefault(); gmDrop.classList.add('drag'); }));
     ['dragleave', 'drop'].forEach(ev => gmDrop.addEventListener(ev, (e) => { e.preventDefault(); gmDrop.classList.remove('drag'); }));
     gmDrop.addEventListener('drop', (e) => { if (e.dataTransfer && e.dataTransfer.files) uploadFiles(e.dataTransfer.files); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && gmOverlay.classList.contains('open')) closeModal(); });
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'Escape' || e.key === 'Esc') && gmOverlay.classList.contains('open')) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      }
+    }, true);
 
     refreshItems();
     loadList();
