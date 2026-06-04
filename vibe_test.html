@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>진동/사운드 테스트</title>
+<style>
+  body { margin:0; background:#0a0a0a; color:#fff; font-family:sans-serif; padding:20px; }
+  h1 { font-size:1.3rem; color:#ff3815; }
+  button { display:block; width:100%; padding:18px; margin:12px 0; font-size:1.1rem;
+           background:#ff3815; color:#fff; border:none; border-radius:8px; }
+  .log { margin-top:20px; padding:14px; background:#1a1a1a; border-radius:8px;
+         font-size:0.85rem; line-height:1.7; white-space:pre-wrap; word-break:break-all; }
+  .ok { color:#4caf50; } .no { color:#ff5252; }
+</style>
+</head>
+<body>
+  <h1>LEOLASER 진동/사운드 테스트</h1>
+  <p style="font-size:0.85rem;color:#aaa;">버튼을 직접 눌러서 확인하세요.</p>
+
+  <button id="vibeBtn">① 진동 테스트 (버튼 누르면 진동)</button>
+  <button id="soundBtn">② 사운드 테스트 (버튼 누르면 소리)</button>
+  <button id="bothBtn">③ 진동 + 사운드 동시</button>
+
+  <div class="log" id="log">결과가 여기 표시됩니다...</div>
+
+<script>
+  var log = document.getElementById('log');
+  function out(msg, cls){
+    var line = document.createElement('div');
+    if(cls) line.className = cls;
+    line.textContent = msg;
+    log.appendChild(line);
+  }
+
+  // 진단 정보
+  out('--- 환경 정보 ---');
+  out('navigator.vibrate 지원: ' + ('vibrate' in navigator ? 'YES' : 'NO'),
+      ('vibrate' in navigator) ? 'ok' : 'no');
+  out('UserAgent: ' + navigator.userAgent);
+  out('-----------------');
+
+  var snd = new Audio('snd_zap.mp3');
+  snd.preload = 'auto';
+
+  document.getElementById('vibeBtn').addEventListener('click', function(){
+    if(!('vibrate' in navigator)){ out('✗ 이 브라우저는 진동 미지원', 'no'); return; }
+    var r = navigator.vibrate([300,100,300]);
+    out('진동 호출함 → 반환값: ' + r + (r ? ' (성공으로 보고됨)' : ' (브라우저가 거부함)'),
+        r ? 'ok' : 'no');
+  });
+
+  document.getElementById('soundBtn').addEventListener('click', function(){
+    snd.currentTime = 0;
+    var p = snd.play();
+    if(p && p.then){
+      p.then(function(){ out('✓ 사운드 재생 성공', 'ok'); })
+       .catch(function(e){ out('✗ 사운드 재생 실패: ' + e.message, 'no'); });
+    } else { out('사운드 play() 호출함 (구형 방식)'); }
+  });
+
+  document.getElementById('bothBtn').addEventListener('click', function(){
+    if('vibrate' in navigator){
+      var r = navigator.vibrate([300,100,300]);
+      out('진동 반환값: ' + r, r ? 'ok' : 'no');
+    }
+    snd.currentTime = 0;
+    var p = snd.play();
+    if(p && p.then){
+      p.then(function(){ out('✓ 사운드 OK', 'ok'); })
+       .catch(function(e){ out('✗ 사운드 실패: ' + e.message, 'no'); });
+    }
+  });
+</script>
+</body>
+</html>
