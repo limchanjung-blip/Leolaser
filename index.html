@@ -80,6 +80,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif+KR:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
 
 <style>
   :root {
@@ -150,7 +152,7 @@
   body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Noto Serif KR', serif;
+    font-family: 'Pretendard', -apple-system, sans-serif;
     font-weight: 300;
     line-height: 1.6;
     overflow-x: hidden;
@@ -300,25 +302,75 @@
   }
   .nav-links {
     display: flex;
-    gap: 2.2rem;
+    gap: 0.5rem;
     list-style: none;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    align-items: center;
   }
   .nav-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     color: var(--ink-dim);
     text-decoration: none;
-    transition: color 0.3s;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.02);
+    transition: color 0.25s, background 0.25s, border-color 0.25s, transform 0.15s;
     position: relative;
+    white-space: nowrap;
   }
-  .nav-links a:hover { color: var(--laser); }
   .nav-links a::before {
     content: attr(data-num);
     color: var(--laser);
-    margin-right: 0.4rem;
-    font-size: 0.7rem;
+    font-size: 0.62rem;
+    opacity: 0.85;
+    transition: color 0.25s;
+  }
+  .nav-links a:hover {
+    color: #fff;
+    background: var(--laser);
+    border-color: var(--laser);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px var(--laser-glow);
+  }
+  .nav-links a:hover::before { color: #fff; }
+
+  /* 우측 상단 고정 카카오 견적 버튼 */
+  .kakao-fixed {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.6rem;
+    z-index: 9000;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    background: #FEE500;
+    color: #181600;
+    border-radius: 999px;
+    padding: 0.6rem 0.85rem 0.6rem 0.6rem;
+    text-decoration: none;
+    box-shadow: 0 6px 22px rgba(254,225,0,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kakao-fixed:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(254,225,0,0.5); }
+  .kakao-fixed-ico {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; background: #181600; border-radius: 50%; flex-shrink: 0;
+  }
+  .kakao-fixed-ico i { color: #FEE500; font-size: 19px; }
+  .kakao-fixed-txt { display: flex; flex-direction: column; line-height: 1.3; }
+  .kakao-fixed-main { font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 0.92rem; letter-spacing: -0.02em; }
+  .kakao-fixed-sub { font-family: 'Pretendard', sans-serif; font-weight: 400; font-size: 0.7rem; opacity: 0.62; letter-spacing: -0.01em; }
+  .kakao-fixed-arrow i { font-size: 18px; margin-left: 0.1rem; }
+  @media (max-width: 768px) {
+    .kakao-fixed { top: 0.9rem; right: 0.9rem; padding: 0.5rem; gap: 0; }
+    .kakao-fixed-txt, .kakao-fixed-arrow { display: none; }
+    .kakao-fixed-ico { width: 40px; height: 40px; }
+    .kakao-fixed-ico i { font-size: 22px; }
   }
 
   /* HERO - 새 디자인 (장비 사진을 메인으로) */
@@ -394,7 +446,7 @@
   .hero-cta-ico { font-size: 1.25rem; line-height: 1; }
   .hero-cta-txt {
     display: flex; flex-direction: column; line-height: 1.25;
-    font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: 1.02rem;
+    font-family: 'Pretendard', -apple-system, sans-serif; font-weight: 700; font-size: 1.02rem;
   }
   .hero-cta-txt small {
     font-weight: 400; font-size: 0.72rem; opacity: 0.7; margin-top: 2px; letter-spacing: 0;
@@ -1225,7 +1277,7 @@
     color: var(--ink);
     text-align: left;
     padding: 1.8rem 0;
-    font-family: 'Noto Serif KR', serif;
+    font-family: 'Pretendard', -apple-system, sans-serif;
     font-size: 1.1rem;
     cursor: pointer;
     display: flex;
@@ -1895,7 +1947,7 @@
   .map-btn .map-btn-ico { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--btn-accent, var(--laser)); color: #fff; font-weight: 700; font-size: 1.05rem; box-shadow: 0 0 0 0 var(--btn-accent, var(--laser)); transition: box-shadow 0.4s ease; }
   .map-btn:hover .map-btn-ico { box-shadow: 0 0 16px 1px var(--btn-glow, var(--laser-glow)); }
   .map-btn .map-btn-txt { display: flex; flex-direction: column; gap: 0.15rem; }
-  .map-btn .map-btn-main { font-family: 'Noto Serif KR', serif; font-weight: 500; font-size: 0.98rem; color: var(--ink); }
+  .map-btn .map-btn-main { font-family: 'Pretendard', -apple-system, sans-serif; font-weight: 500; font-size: 0.98rem; color: var(--ink); }
   .map-btn .map-btn-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim); }
   .map-btn .map-btn-arrow { margin-left: auto; font-family: 'JetBrains Mono', monospace; color: var(--ink-dim); transition: transform 0.3s ease, color 0.3s ease; }
   .map-btn:hover .map-btn-arrow { transform: translateX(4px); color: var(--btn-accent, var(--laser)); }
@@ -1910,12 +1962,7 @@
     .map-btn .map-btn-sub { font-size: 0.56rem; }
   }
 
-  /* ===== 플로팅 문의 버튼 (카카오) ===== */
-  .float-contact { position: fixed; right: 1.4rem; bottom: 1.6rem; z-index: 200; display: flex; flex-direction: column; gap: 0.7rem; align-items: flex-end; }
-  .fc-btn { display: flex; align-items: center; gap: 0.55rem; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; color: #fff; padding: 0.7rem 1.1rem; border-radius: 40px; box-shadow: 0 6px 20px rgba(0,0,0,0.45); transition: transform 0.25s ease, box-shadow 0.25s ease; white-space: nowrap; }
-  .fc-btn:hover { transform: translateY(-2px); box-shadow: 0 9px 26px rgba(0,0,0,0.55); }
-  .fc-btn .fc-ico { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .fc-kakao { background: #fae100; color: #181600; }
+  /* ===== 플로팅 문의 버튼 (제거됨 - 우측 상단 kakao-fixed로 대체) ===== */
   @media (max-width: 600px) {
     .float-contact { bottom: 5.2rem; right: 1rem; }
     .fc-btn { padding: 0.65rem 1rem; font-size: 0.78rem; }
@@ -2065,6 +2112,16 @@
   </ul>
 </nav>
 
+<!-- 우측 상단 고정 카카오 견적 버튼 (시안 A) -->
+<a class="kakao-fixed" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener" aria-label="카카오톡 견적 문의">
+  <span class="kakao-fixed-ico"><i class="ti ti-message-circle-2"></i></span>
+  <span class="kakao-fixed-txt">
+    <span class="kakao-fixed-main">카카오톡 견적 문의</span>
+    <span class="kakao-fixed-sub">도면 보내면 24시간 내 회신</span>
+  </span>
+  <span class="kakao-fixed-arrow"><i class="ti ti-arrow-right"></i></span>
+</a>
+
 <!-- HERO - 장비 사진을 메인으로 -->
 <header class="hero">
   <div class="hero-marks">
@@ -2078,11 +2135,6 @@
     </h1>
     <div class="hero-right">
       <p class="hero-sub">합판 · MDF<br>정밀 레이저 커팅</p>
-      <a class="hero-cta" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
-        <span class="hero-cta-ico">💬</span>
-        <span class="hero-cta-txt">카카오톡 견적 문의<small>도면 보내주시면 24시간 내 회신</small></span>
-        <span class="hero-cta-arrow">→</span>
-      </a>
     </div>
   </div>
 
@@ -2694,16 +2746,6 @@
 })();
 
 </script>
-
-<!-- 플로팅 문의 버튼 (카카오톡) -->
-<div class="float-contact">
-  <a class="fc-btn fc-kakao" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener" aria-label="카카오톡 문의">
-    <span class="fc-ico">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#181600"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.8-.8 2.7-.9 3.1 0 0-.02.16.08.22.1.06.22.01.22.01.3-.04 3.4-2.2 4-2.6.6.08 1.2.13 1.9.13 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>
-    </span>
-    <span class="fc-label">카카오 문의</span>
-  </a>
-</div>
 
 <!-- 모바일 하단 고정 전화/이메일 바 -->
 <div class="mobile-bar">
