@@ -1656,52 +1656,55 @@
   @media (max-width: 900px) {
     nav {
       position: relative;
-      padding: 0.9rem 1rem;
+      padding: 1rem;
       flex-direction: column;
       align-items: stretch;
       gap: 0;
     }
-    .logo { font-size: 1.4rem; margin-bottom: 0.9rem; }
+    .logo { font-size: 1.5rem; margin-bottom: 0.9rem; }
     .kakao-fixed { display: none; }
     .nav-links {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.4rem;
+      gap: 7px;
       width: 100%;
     }
     .nav-links a {
-      padding: 0.7rem 0.3rem;
-      font-size: 0.66rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       justify-content: center;
+      gap: 2px;
+      padding: 9px 3px;
+      font-size: 0.7rem;
       border-radius: 11px;
+      text-align: center;
+      line-height: 1.25;
     }
-    /* GAME 메뉴 항목 (모바일에서만 보임, 07 옆 8번째 칸) */
-    .nav-game-li { display: block; }
-    .nav-game {
-      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-      width: 100%;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; font-weight: 700;
-      letter-spacing: 0.05em; color: var(--laser);
-      padding: 0.7rem 0.3rem;
-      border: 1px solid rgba(255,56,21,0.5); border-radius: 11px;
-      background: rgba(255,56,21,0.08); text-decoration: none;
-    }
-    .nav-game i { font-size: 14px; }
-    /* 카톡 바: 메뉴 아래 가로 꽉 차게 크게 */
+    .nav-links a::before { font-size: 0.6rem; }
+    /* 07 오시는길은 글자가 기니까 2칸, 가로 정렬 */
+    .nav-links li:nth-child(7) { grid-column: span 2; }
+    .nav-links li:nth-child(7) a { flex-direction: row; gap: 5px; }
+    /* 카톡 바: 메뉴 아래 가로 꽉 차게, 텍스트도 크게 */
     .nav-kakao-bar {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
+      gap: 11px;
       width: 100%;
-      margin-top: 0.4rem;
+      margin-top: 7px;
       background: #FEE500;
       border-radius: 12px;
-      padding: 0.7rem;
+      padding: 12px;
       text-decoration: none;
       box-shadow: 0 4px 16px rgba(254,225,0,0.3);
+      box-sizing: border-box;
     }
-    .nav-kakao-txt { align-items: flex-start; }
+    .nav-kakao-ico { width: 38px; height: 38px; }
+    .nav-kakao-ico i { font-size: 20px; }
+    .nav-kakao-txt { align-items: flex-start; line-height: 1.25; }
+    .nav-kakao-main { font-size: 1rem; }
+    .nav-kakao-sub { font-size: 0.7rem; opacity: 0.65; }
     section, .hero { padding-left: 1.5rem; padding-right: 1.5rem; }
   }
 
@@ -2177,7 +2180,6 @@
     <li><a href="#gallery" data-num="05">갤러리</a></li>
     <li><a href="#faq" data-num="06">FAQ</a></li>
     <li><a href="#map" data-num="07">오시는길</a></li>
-    <li class="nav-game-li"><a class="nav-game" id="navGameBtn" href="#"><i class="ti ti-device-gamepad-2"></i> GAME</a></li>
   </ul>
   <a class="nav-kakao-bar" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
     <span class="nav-kakao-ico"><i class="ti ti-message-circle-2"></i></span>
