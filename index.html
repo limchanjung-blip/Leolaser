@@ -86,7 +86,8 @@
     --bg: #0a0a0a;
     --bg-2: #121212;
     --ink: #f4f1ea;
-    --ink-dim: #8a8780;
+    --ink-dim: #a8a49b;
+    --ink-body: #d6d2c9;
     --line: #2a2a2a;
     --laser: #ff3815;
     --laser-glow: rgba(255, 56, 21, 0.4);
@@ -373,6 +374,35 @@
     border-left: 2px solid var(--laser);
     padding-left: 1rem;
     text-align: right;
+  }
+  .hero-right { display: flex; flex-direction: column; align-items: flex-end; }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 1.6rem;
+    padding: 0.95rem 1.4rem;
+    background: #fae100;
+    color: #181600;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 8px 28px rgba(250,225,0,0.28);
+    transition: transform .2s, box-shadow .2s;
+    animation: ctaPulse 2.6s ease-in-out infinite;
+  }
+  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(250,225,0,0.45); }
+  .hero-cta-ico { font-size: 1.25rem; line-height: 1; }
+  .hero-cta-txt {
+    display: flex; flex-direction: column; line-height: 1.25;
+    font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: 1.02rem;
+  }
+  .hero-cta-txt small {
+    font-weight: 400; font-size: 0.72rem; opacity: 0.7; margin-top: 2px; letter-spacing: 0;
+  }
+  .hero-cta-arrow { font-size: 1.15rem; font-weight: 700; }
+  @keyframes ctaPulse {
+    0%, 100% { box-shadow: 0 8px 28px rgba(250,225,0,0.28); }
+    50% { box-shadow: 0 8px 34px rgba(250,225,0,0.5); }
   }
 
   /* 메인 장비 사진 - 크기 조정 */
@@ -941,6 +971,7 @@
     font-size: 1.05rem;
     line-height: 1.9;
     margin-bottom: 1.5rem;
+    color: var(--ink-body);
   }
   .about-text p:first-child::first-letter {
     font-family: 'Bebas Neue', sans-serif;
@@ -1109,6 +1140,7 @@
     font-size: 1.05rem;
     line-height: 1.9;
     margin-bottom: 2rem;
+    color: var(--ink-body);
   }
   .spec-list {
     list-style: none;
@@ -1252,7 +1284,7 @@
   .contact-text {
     font-size: 1.05rem;
     line-height: 1.9;
-    color: var(--ink-dim);
+    color: var(--ink-body);
     margin-bottom: 3rem;
   }
   .contact-info {
@@ -1589,6 +1621,15 @@
       padding-left: 0.8rem;
       letter-spacing: 0.15em;
     }
+    .hero-right { align-items: stretch; width: 100%; }
+    .hero-cta {
+      margin-top: 1.2rem;
+      justify-content: center;
+      width: 100%;
+      padding: 1.05rem 1rem;
+    }
+    .hero-cta-txt { font-size: 1rem; }
+    .hero-cta-arrow { margin-left: auto; }
 
     /* HERO 메인 사진 - 원본 비율 유지(헤드·빔 정렬 일관성) */
     .hero-machine {
@@ -2035,7 +2076,14 @@
     <h1 class="hero-title">
       CUT WITH<br><span class="accent">LIGHT</span>.
     </h1>
-    <p class="hero-sub">합판 · MDF<br>정밀 레이저 커팅</p>
+    <div class="hero-right">
+      <p class="hero-sub">합판 · MDF<br>정밀 레이저 커팅</p>
+      <a class="hero-cta" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
+        <span class="hero-cta-ico">💬</span>
+        <span class="hero-cta-txt">카카오톡 견적 문의<small>도면 보내주시면 24시간 내 회신</small></span>
+        <span class="hero-cta-arrow">→</span>
+      </a>
+    </div>
   </div>
 
   <!-- 메인 장비 사진 -->
