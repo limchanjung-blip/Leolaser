@@ -340,6 +340,7 @@
   .nav-links a:hover::before { color: #fff; }
 
   /* 메뉴 아래 분리된 카톡 바 (모바일에서만 보임) */
+  .nav-kakao-wrap { display: none; }
   .nav-kakao-bar { display: none; }
   .nav-kakao-ico {
     display: flex; align-items: center; justify-content: center;
@@ -1653,12 +1654,12 @@
   /* ===== 태블릿 (768px ~ 900px) ===== */
   @media (max-width: 900px) {
     nav {
-      padding: 0.9rem 1.2rem;
+      padding: 0.9rem 1rem;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 0.7rem;
+      align-items: stretch;
+      gap: 0;
     }
-    .logo { font-size: 1.3rem; }
+    .logo { font-size: 1.4rem; margin-bottom: 0.9rem; }
     .kakao-fixed { display: none; }
     .nav-links {
       display: grid;
@@ -1667,21 +1668,29 @@
       width: 100%;
     }
     .nav-links a {
-      padding: 0.45rem 0.5rem;
-      font-size: 0.64rem;
+      padding: 0.7rem 0.4rem;
+      font-size: 0.7rem;
       justify-content: center;
+      border-radius: 12px;
     }
     /* 07 오시는길은 글자가 기니까 2칸 차지 → 빈 칸 없이 꽉 */
     .nav-links li:nth-child(7) { grid-column: span 2; }
-    /* 분리된 카톡 바: 메뉴 아래 우측에 따로 */
+    /* 메뉴와 카톡 사이 분리: 구분선 있는 래퍼 */
+    .nav-kakao-wrap {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
     .nav-kakao-bar {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      align-self: flex-end;
       background: #FEE500;
       border-radius: 999px;
-      padding: 6px 13px 6px 6px;
+      padding: 7px 14px 7px 7px;
       text-decoration: none;
       box-shadow: 0 4px 16px rgba(254,225,0,0.3);
     }
@@ -2161,10 +2170,12 @@
     <li><a href="#faq" data-num="06">FAQ</a></li>
     <li><a href="#map" data-num="07">오시는길</a></li>
   </ul>
-  <a class="nav-kakao-bar" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
-    <span class="nav-kakao-ico"><i class="ti ti-message-circle-2"></i></span>
-    <span class="nav-kakao-txt"><span class="nav-kakao-main">카카오톡 견적 문의</span><span class="nav-kakao-sub">도면 보내시면 1시간 내 회신</span></span>
-  </a>
+  <div class="nav-kakao-wrap">
+    <a class="nav-kakao-bar" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
+      <span class="nav-kakao-ico"><i class="ti ti-message-circle-2"></i></span>
+      <span class="nav-kakao-txt"><span class="nav-kakao-main">카카오톡 견적 문의</span><span class="nav-kakao-sub">도면 보내시면 1시간 내 회신</span></span>
+    </a>
+  </div>
 </nav>
 
 <!-- 우측 상단 고정 카카오 견적 버튼 (시안 A) -->
