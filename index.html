@@ -1654,6 +1654,7 @@
   /* ===== 태블릿 (768px ~ 900px) ===== */
   @media (max-width: 900px) {
     nav {
+      position: relative;
       padding: 0.9rem 1rem;
       flex-direction: column;
       align-items: stretch;
@@ -1675,14 +1676,13 @@
     }
     /* 07 오시는길은 글자가 기니까 2칸 차지 → 빈 칸 없이 꽉 */
     .nav-links li:nth-child(7) { grid-column: span 2; }
-    /* 메뉴와 카톡 사이 분리: 구분선 있는 래퍼 */
+    /* 메뉴(nav) 밖, 본문 맨 위에 오는 카톡 영역 */
     .nav-kakao-wrap {
       display: flex;
       justify-content: flex-end;
       width: 100%;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 0.9rem 1rem;
+      background: #0a0a0a;
     }
     .nav-kakao-bar {
       display: inline-flex;
@@ -1701,7 +1701,7 @@
   @media (max-width: 768px) {
     /* 섹션 패딩 줄이기 */
     section { padding: 4.5rem 1.2rem; }
-    .hero { padding: 9.5rem 1.2rem 3rem; }
+    .hero { padding: 2.5rem 1.2rem 3rem; }
 
     /* 헤더 마크 - 두 줄로 */
     .hero-marks {
@@ -2170,13 +2170,13 @@
     <li><a href="#faq" data-num="06">FAQ</a></li>
     <li><a href="#map" data-num="07">오시는길</a></li>
   </ul>
+</nav>
   <div class="nav-kakao-wrap">
     <a class="nav-kakao-bar" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
       <span class="nav-kakao-ico"><i class="ti ti-message-circle-2"></i></span>
       <span class="nav-kakao-txt"><span class="nav-kakao-main">카카오톡 견적 문의</span><span class="nav-kakao-sub">도면 보내시면 1시간 내 회신</span></span>
     </a>
   </div>
-</nav>
 
 <!-- 우측 상단 고정 카카오 견적 버튼 (시안 A) -->
 <a class="kakao-fixed" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener" aria-label="카카오톡 견적 문의">
