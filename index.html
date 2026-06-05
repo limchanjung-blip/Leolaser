@@ -342,6 +342,7 @@
   /* 메뉴 아래 분리된 카톡 바 (모바일에서만 보임) */
   .nav-kakao-wrap { display: none; }
   .nav-kakao-bar { display: none; }
+  .nav-game-li { display: none; }
   .nav-kakao-ico {
     display: flex; align-items: center; justify-content: center;
     width: 26px; height: 26px; background: #8a4fe0; border-radius: 50%; flex-shrink: 0;
@@ -1669,31 +1670,38 @@
       width: 100%;
     }
     .nav-links a {
-      padding: 0.7rem 0.4rem;
-      font-size: 0.7rem;
+      padding: 0.7rem 0.3rem;
+      font-size: 0.66rem;
       justify-content: center;
-      border-radius: 12px;
+      border-radius: 11px;
     }
-    /* 07 오시는길은 글자가 기니까 2칸 차지 → 빈 칸 없이 꽉 */
-    .nav-links li:nth-child(7) { grid-column: span 2; }
-    /* 메뉴(nav) 밖, 본문 맨 위에 오는 카톡 영역 */
-    .nav-kakao-wrap {
-      display: flex;
-      justify-content: flex-end;
+    /* GAME 메뉴 항목 (모바일에서만 보임, 07 옆 8번째 칸) */
+    .nav-game-li { display: block; }
+    .nav-game {
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
       width: 100%;
-      padding: 0.9rem 1rem;
-      background: #0a0a0a;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.05em; color: var(--laser);
+      padding: 0.7rem 0.3rem;
+      border: 1px solid rgba(255,56,21,0.5); border-radius: 11px;
+      background: rgba(255,56,21,0.08); text-decoration: none;
     }
+    .nav-game i { font-size: 14px; }
+    /* 카톡 바: 메뉴 아래 가로 꽉 차게 크게 */
     .nav-kakao-bar {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 7px;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      margin-top: 0.4rem;
       background: #FEE500;
-      border-radius: 999px;
-      padding: 7px 14px 7px 7px;
+      border-radius: 12px;
+      padding: 0.7rem;
       text-decoration: none;
       box-shadow: 0 4px 16px rgba(254,225,0,0.3);
     }
+    .nav-kakao-txt { align-items: flex-start; }
     section, .hero { padding-left: 1.5rem; padding-right: 1.5rem; }
   }
 
@@ -2169,14 +2177,13 @@
     <li><a href="#gallery" data-num="05">갤러리</a></li>
     <li><a href="#faq" data-num="06">FAQ</a></li>
     <li><a href="#map" data-num="07">오시는길</a></li>
+    <li class="nav-game-li"><a class="nav-game" id="navGameBtn" href="#"><i class="ti ti-device-gamepad-2"></i> GAME</a></li>
   </ul>
+  <a class="nav-kakao-bar" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
+    <span class="nav-kakao-ico"><i class="ti ti-message-circle-2"></i></span>
+    <span class="nav-kakao-txt"><span class="nav-kakao-main">카카오톡 견적 문의</span><span class="nav-kakao-sub">도면 보내시면 1시간 내 회신</span></span>
+  </a>
 </nav>
-  <div class="nav-kakao-wrap">
-    <a class="nav-kakao-bar" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener">
-      <span class="nav-kakao-ico"><i class="ti ti-message-circle-2"></i></span>
-      <span class="nav-kakao-txt"><span class="nav-kakao-main">카카오톡 견적 문의</span><span class="nav-kakao-sub">도면 보내시면 1시간 내 회신</span></span>
-    </a>
-  </div>
 
 <!-- 우측 상단 고정 카카오 견적 버튼 (시안 A) -->
 <a class="kakao-fixed" href="http://pf.kakao.com/_XWxbGX/chat" target="_blank" rel="noopener" aria-label="카카오톡 견적 문의">
@@ -3527,6 +3534,8 @@
   openBtn.addEventListener('click',function(){modal.style.display='flex';document.body.style.overflow='hidden';if(window.__glReset)window.__glReset();});
   function closeGame(){modal.style.display='none';document.body.style.overflow='';if(window.__glStop)window.__glStop();}
   if(closeBtn)closeBtn.addEventListener('click',closeGame);
+  var navGame=document.getElementById('navGameBtn');
+  if(navGame)navGame.addEventListener('click',function(e){e.preventDefault();openBtn.click();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.style.display==='flex')closeGame();});
 })();
 </script>
