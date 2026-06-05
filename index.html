@@ -367,10 +367,20 @@
   .kakao-fixed-sub { font-family: 'Pretendard', sans-serif; font-weight: 400; font-size: 0.7rem; opacity: 0.62; letter-spacing: -0.01em; }
   .kakao-fixed-arrow i { font-size: 18px; margin-left: 0.1rem; }
   @media (max-width: 768px) {
-    .kakao-fixed { top: 0.9rem; right: 0.9rem; padding: 0.5rem; gap: 0; }
-    .kakao-fixed-txt, .kakao-fixed-arrow { display: none; }
-    .kakao-fixed-ico { width: 40px; height: 40px; }
-    .kakao-fixed-ico i { font-size: 22px; }
+    .kakao-fixed {
+      position: fixed;
+      top: 0.75rem;
+      right: 1rem;
+      padding: 0.4rem 0.7rem 0.4rem 0.4rem;
+      gap: 0.45rem;
+      box-shadow: 0 4px 16px rgba(254,225,0,0.3);
+    }
+    .kakao-fixed-txt { display: flex; }
+    .kakao-fixed-arrow { display: none; }
+    .kakao-fixed-ico { width: 28px; height: 28px; }
+    .kakao-fixed-ico i { font-size: 15px; }
+    .kakao-fixed-main { font-size: 0.74rem; }
+    .kakao-fixed-sub { font-size: 0.58rem; }
   }
 
   /* HERO - 새 디자인 (장비 사진을 메인으로) */
@@ -1631,9 +1641,23 @@
 
   /* ===== 태블릿 (768px ~ 900px) ===== */
   @media (max-width: 900px) {
-    nav { padding: 1rem 1.5rem; }
-    .nav-links { display: none; }
-    .logo { font-size: 1.3rem; }
+    nav {
+      padding: 0.9rem 1.2rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.7rem;
+    }
+    .logo { font-size: 1.3rem; max-width: 60%; }
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      width: 100%;
+    }
+    .nav-links a {
+      padding: 0.42rem 0.7rem;
+      font-size: 0.66rem;
+    }
     section, .hero { padding-left: 1.5rem; padding-right: 1.5rem; }
   }
 
@@ -1641,7 +1665,7 @@
   @media (max-width: 768px) {
     /* 섹션 패딩 줄이기 */
     section { padding: 4.5rem 1.2rem; }
-    .hero { padding: 6rem 1.2rem 3rem; }
+    .hero { padding: 9.5rem 1.2rem 3rem; }
 
     /* 헤더 마크 - 두 줄로 */
     .hero-marks {
