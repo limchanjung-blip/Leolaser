@@ -2619,7 +2619,8 @@
   try {
     bootAudio = new Audio('snd_zap.mp3');
     bootAudio.preload = 'auto';
-    bootAudio.volume = 0.48;
+    var _mob = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (('ontouchstart' in window) && window.innerWidth < 900);
+    bootAudio.volume = _mob ? 0.24 : 0.48;
   } catch(e){ bootAudio = null; }
   function playBootSound(){
     if(soundPlayed || !bootAudio) return;
@@ -3892,10 +3893,9 @@
   function px(c,x,y,col){c.fillStyle=col;c.fillRect(Math.round(x/PX)*PX,Math.round(y/PX)*PX,PX,PX);}
   function dCirc(c,cx,cy,r,col,gl){c.save();if(gl){c.shadowColor=gl;c.shadowBlur=10;}cx=Math.round(cx);cy=Math.round(cy);for(var yy=-r;yy<=r;yy+=PX){var xw=Math.floor(Math.sqrt(Math.max(0,r*r-yy*yy)));c.fillStyle=col;c.fillRect(Math.round((cx-xw)/PX)*PX,Math.round((cy+yy)/PX)*PX,Math.ceil(xw*2/PX)*PX+PX,PX);}c.restore();}
   function dStar(c,cx,cy,r,col,gl){c.save();if(gl){c.shadowColor=gl;c.shadowBlur=10;}c.fillStyle=col;var pts=[];for(var k=0;k<5;k++){var a1=-Math.PI/2+k*2*Math.PI/5,a2=a1+Math.PI/5;pts.push([Math.cos(a1)*r,Math.sin(a1)*r]);pts.push([Math.cos(a2)*r*0.45,Math.sin(a2)*r*0.45]);}c.beginPath();pts.forEach(function(p,i){i?c.lineTo(cx+p[0],cy+p[1]):c.moveTo(cx+p[0],cy+p[1]);});c.closePath();c.fill();c.restore();}
-  function cannonBody(c,cx,cy,ang,col,dark){c.save();c.translate(cx,cy);c.rotate(ang+Math.PI/2);
-    for(var yy=0;yy<=14;yy+=PX){var hw=9+yy*0.6;c.fillStyle=dark;c.fillRect(Math.round(-hw/PX)*PX,Math.round(yy/PX)*PX,Math.ceil(hw*2/PX)*PX+PX,PX);}
-    c.shadowColor=col;c.shadowBlur=10;c.fillStyle=col;c.fillRect(-PX*1.5,-26,PX*3,28);c.fillStyle='#fff';c.fillRect(-PX*1.5,-26,PX*3,PX);c.restore();
-    dCirc(c,cx,cy,6,dark);dCirc(c,cx,cy,3,col,col);}
+  function cannonBody(c,cx,cy,ang,col,dark){
+    c.save();c.translate(cx,cy);c.rotate(ang+Math.PI/2);c.shadowColor=col;c.shadowBlur=10;c.fillStyle=col;c.fillRect(-PX*1.5,-26,PX*3,28);c.fillStyle='#fff';c.fillRect(-PX*1.5,-26,PX*3,PX);c.restore();
+    dCirc(c,cx,cy,11,col,col);}
   function draw(){
     var vis=modal&&modal.style.display==='flex'&&selEl&&selEl.style.display!=='none';
     if(vis){tk++;
