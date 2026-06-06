@@ -3793,15 +3793,18 @@
       spawnBall(can.a);shots--;sFire();vib(8);}}
   function press(){ac();if(startLock>0)return;if(st===S_P&&fail===0&&shots>0){charging=true;chargeT=0;}}
   function release(){if(startLock>0)return;if(st===S_P){if(charging){var dbl=(chargeT>28&&shots>=2);charging=false;chargeT=0;fire(dbl);}charging=false;chargeT=0;return;}if(st===S_T){init();st=S_P;startLock=18;}else if(st===S_HOW){if(howT>14){init();st=S_P;startLock=18;}}else if(st===S_O){st=S_T;ld();startLock=10;}}
-  cv.addEventListener('mousedown',function(e){e.preventDefault();e.stopPropagation();var p=gxy(e);ac();if(st===S_NAME){nck(p.x,p.y);return;}if(st===S_P&&p.x>W-46&&p.y<42&&p.y>22){eg();return;}press();});
-  cv.addEventListener('mouseup',function(e){e.preventDefault();e.stopPropagation();release();});
-  cv.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();var p=gxy(e,1);ac();if(st===S_NAME){nck(p.x,p.y);return;}if(st===S_P&&p.x>W-46&&p.y<42&&p.y>22){eg();return;}press();},{passive:false});
-  cv.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();release();},{passive:false});
+  var touchHeld=false,lastTouch=0;
+  cv.addEventListener('mousedown',function(e){if(touchHeld||Date.now()-lastTouch<600)return;e.preventDefault();e.stopPropagation();var p=gxy(e);ac();if(st===S_NAME){nck(p.x,p.y);return;}if(st===S_P&&p.x>W-46&&p.y<42&&p.y>22){eg();return;}press();});
+  cv.addEventListener('mouseup',function(e){if(touchHeld||Date.now()-lastTouch<600)return;e.preventDefault();e.stopPropagation();release();});
+  cv.addEventListener('touchstart',function(e){touchHeld=true;lastTouch=Date.now();e.preventDefault();e.stopPropagation();var p=gxy(e,1);ac();if(st===S_NAME){nck(p.x,p.y);return;}if(st===S_P&&p.x>W-46&&p.y<42&&p.y>22){eg();return;}press();},{passive:false});
+  cv.addEventListener('touchend',function(e){lastTouch=Date.now();e.preventDefault();e.stopPropagation();release();touchHeld=false;},{passive:false});
   function fromUI(tg){while(tg){if(tg.id==='gameClose'||tg.className==='gameBack'||tg.className==='gameCard'||tg.id==='gameSelect'||tg.id==='SP_cv')return true;tg=tg.parentNode;}return false;}
-  function outDown(e){if(spinEl.style.display==='none'||fromUI(e.target))return;ac();if(st===S_P){press();}}
-  function outUp(e){if(spinEl.style.display==='none'||fromUI(e.target))return;release();}
+  function outDown(e){if(spinEl.style.display==='none'||fromUI(e.target))return;if(touchHeld||Date.now()-lastTouch<600)return;ac();if(st===S_P){press();}}
+  function outUp(e){if(spinEl.style.display==='none'||fromUI(e.target))return;if(touchHeld||Date.now()-lastTouch<600)return;release();}
+  function outTDown(e){if(spinEl.style.display==='none'||fromUI(e.target))return;touchHeld=true;lastTouch=Date.now();ac();if(st===S_P){press();}}
+  function outTUp(e){if(spinEl.style.display==='none'||fromUI(e.target)){touchHeld=false;return;}lastTouch=Date.now();release();touchHeld=false;}
   modal.addEventListener('mousedown',outDown);modal.addEventListener('mouseup',outUp);
-  modal.addEventListener('touchstart',outDown,{passive:true});modal.addEventListener('touchend',outUp,{passive:true});
+  modal.addEventListener('touchstart',outTDown,{passive:true});modal.addEventListener('touchend',outTUp,{passive:true});
   function nck(mx,my){for(var i=0;i<3;i++){var x=W/2-50+i*38;if(mx>x-17&&mx<x+17){np=i;if(my>H/2-46&&my<H/2-22){var c=nc[i].charCodeAt(0)-65;nc[i]=String.fromCharCode(65+(c+1)%26);sNav(1);return;}if(my>H/2+10&&my<H/2+34){var c2=nc[i].charCodeAt(0)-65;nc[i]=String.fromCharCode(65+(c2+25)%26);sNav(0);return;}}}if(my>H/2+52&&my<H/2+82&&mx>W/2-50&&mx<W/2+50)cm();}
   function fsc(){return totSc+(lvl-1)*100+maxC*30;}
   function eg(){var sc=fsc(),mn=scores.length<10?-1:scores[scores.length-1].s;if(sc>0&&(scores.length<10||sc>mn)){st=S_NAME;nc=['A','A','A'];np=0;}else st=S_O;}
