@@ -3503,25 +3503,16 @@
     <div style="text-align:center;font-family:'JetBrains Mono',monospace;color:#7a7298;font-size:11px;margin-bottom:20px;">플레이할 게임을 골라주세요</div>
     <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
       <button class="gameCard" data-game="stack" style="flex:1 1 0;min-width:140px;max-width:280px;background:#0a0f1a;border:3px solid #283850;border-radius:12px;padding:0;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s;">
-        <div style="aspect-ratio:1/1;background:linear-gradient(160deg,#141e30,#0a0f1a);display:flex;align-items:center;justify-content:center;position:relative;">
-          <svg width="64" height="64" viewBox="0 0 64 64" style="image-rendering:pixelated;">
-            <rect x="14" y="40" width="36" height="9" fill="#ffd23e"/><rect x="18" y="30" width="30" height="9" fill="#7fffd4"/><rect x="22" y="20" width="24" height="9" fill="#ff5ec4"/><rect x="26" y="11" width="16" height="8" fill="#3ea6ff"/>
-          </svg>
-        </div>
+        <canvas id="thumbStack" width="240" height="200" style="display:block;width:100%;aspect-ratio:1.2/1;image-rendering:pixelated;"></canvas>
         <div style="padding:11px 8px;background:#141e30;font-family:'Press Start 2P','JetBrains Mono',monospace;">
           <div style="color:#ffd23e;font-size:10px;margin-bottom:5px;">LEO STACK</div>
           <div style="color:#6a8ab0;font-size:6px;line-height:1.5;font-family:'JetBrains Mono',monospace;">블록 쌓기</div>
         </div>
       </button>
       <button class="gameCard" data-game="spinner" style="flex:1 1 0;min-width:140px;max-width:280px;background:#0a0812;border:3px solid #221c38;border-radius:12px;padding:0;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s;">
-        <div style="aspect-ratio:1/1;background:linear-gradient(160deg,#1a1230,#0a0812);display:flex;align-items:center;justify-content:center;position:relative;">
-          <svg width="64" height="64" viewBox="0 0 64 64" style="image-rendering:pixelated;">
-            <polygon points="46,16 48,22 54,22 49,26 51,32 46,28 41,32 43,26 38,22 44,22" fill="#ffd84d"/>
-            <rect x="29" y="34" width="6" height="18" fill="#ff5a96"/><circle cx="32" cy="52" r="7" fill="#2e2640"/><circle cx="32" cy="52" r="3" fill="#ff5a96"/>
-          </svg>
-        </div>
+        <canvas id="thumbSpin" width="240" height="200" style="display:block;width:100%;aspect-ratio:1.2/1;image-rendering:pixelated;"></canvas>
         <div style="padding:11px 8px;background:#120e22;font-family:'Press Start 2P','JetBrains Mono',monospace;">
-          <div style="color:#ff5a96;font-size:10px;margin-bottom:5px;">SPINNER</div>
+          <div style="color:#ff5a96;font-size:10px;margin-bottom:5px;">LEO SPINNER</div>
           <div style="color:#7a7298;font-size:6px;line-height:1.5;font-family:'JetBrains Mono',monospace;">회전 발사</div>
         </div>
       </button>
@@ -3545,7 +3536,7 @@
     <button class="gameBack" style="position:absolute;top:-2px;left:0;transform:translateY(-115%);background:rgba(255,255,255,.1);color:#fff;border:none;font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;z-index:2;">← 선택</button>
     <div style="background:#0a0812;border-radius:8px;overflow:hidden;border:4px solid #221c38;box-shadow:0 0 24px rgba(255,90,150,.18);">
       <div style="padding:9px 12px;display:flex;justify-content:space-between;align-items:center;background:#120e22;border-bottom:3px solid #221c38;font-family:'Press Start 2P','JetBrains Mono',monospace;font-size:8px;">
-        <span style="color:#ff5a96;letter-spacing:2px;text-shadow:0 0 8px rgba(255,90,150,.6);">SPINNER</span><span style="color:#6fe0c8;"><b id="SP_hud">ST 1</b></span>
+        <span style="color:#ff5a96;letter-spacing:2px;text-shadow:0 0 8px rgba(255,90,150,.6);">LEO SPINNER</span><span style="color:#6fe0c8;"><b id="SP_hud">ST 1</b></span>
       </div>
       <canvas id="SP_cv" width="280" height="400" style="display:block;width:100%;touch-action:none;background:#0a0812;image-rendering:pixelated;"></canvas>
       <div style="padding:7px 12px;text-align:center;font-family:'Press Start 2P','JetBrains Mono',monospace;color:#6a5a8a;font-size:6px;background:#120e22;border-top:3px solid #221c38;">포신 돌면 탭 발사! 한 발로 다 먹으면 목숨+1</div>
@@ -3866,6 +3857,44 @@
     raf=requestAnimationFrame(loop);}
   window.SP_reset=function(){ld();st=S_T;tk=0;if(!running){running=true;loop();}};
   window.SP_stop=function(){running=false;if(raf)cancelAnimationFrame(raf);};
+})();
+</script>
+
+<script>
+(function(){
+  var sc=document.getElementById('thumbStack'),pc=document.getElementById('thumbSpin');
+  if(!sc||!pc)return;
+  var modal=document.getElementById('gameModal'),selEl=document.getElementById('gameSelect');
+  var sx=sc.getContext('2d'),SW=240,SH=200;
+  var px2=pc.getContext('2d'),PW=240,PH=200;var PX=4,tk=0;
+  function px(c,x,y,col){c.fillStyle=col;c.fillRect(Math.round(x/PX)*PX,Math.round(y/PX)*PX,PX,PX);}
+  function dCirc(c,cx,cy,r,col,gl){c.save();if(gl){c.shadowColor=gl;c.shadowBlur=10;}cx=Math.round(cx);cy=Math.round(cy);for(var yy=-r;yy<=r;yy+=PX){var xw=Math.floor(Math.sqrt(Math.max(0,r*r-yy*yy)));c.fillStyle=col;c.fillRect(Math.round((cx-xw)/PX)*PX,Math.round((cy+yy)/PX)*PX,Math.ceil(xw*2/PX)*PX+PX,PX);}c.restore();}
+  function dStar(c,cx,cy,r,col,gl){c.save();if(gl){c.shadowColor=gl;c.shadowBlur=10;}c.fillStyle=col;var pts=[];for(var k=0;k<5;k++){var a1=-Math.PI/2+k*2*Math.PI/5,a2=a1+Math.PI/5;pts.push([Math.cos(a1)*r,Math.sin(a1)*r]);pts.push([Math.cos(a2)*r*0.45,Math.sin(a2)*r*0.45]);}c.beginPath();pts.forEach(function(p,i){i?c.lineTo(cx+p[0],cy+p[1]):c.moveTo(cx+p[0],cy+p[1]);});c.closePath();c.fill();c.restore();}
+  function cannonBody(c,cx,cy,ang,col,dark){c.save();c.translate(cx,cy);c.rotate(ang+Math.PI/2);
+    for(var yy=0;yy<=14;yy+=PX){var hw=9+yy*0.6;c.fillStyle=dark;c.fillRect(Math.round(-hw/PX)*PX,Math.round(yy/PX)*PX,Math.ceil(hw*2/PX)*PX+PX,PX);}
+    c.shadowColor=col;c.shadowBlur=10;c.fillStyle=col;c.fillRect(-PX*1.5,-26,PX*3,28);c.fillStyle='#fff';c.fillRect(-PX*1.5,-26,PX*3,PX);c.restore();
+    dCirc(c,cx,cy,6,dark);dCirc(c,cx,cy,3,col,col);}
+  function draw(){
+    var vis=modal&&modal.style.display==='flex'&&selEl&&selEl.style.display!=='none';
+    if(vis){tk++;
+      var g=sx.createLinearGradient(0,0,0,SH);g.addColorStop(0,'#141e30');g.addColorStop(1,'#0a0f1a');sx.fillStyle=g;sx.fillRect(0,0,SW,SH);
+      sx.fillStyle='rgba(127,180,220,0.05)';for(var x=0;x<SW;x+=16)for(var y=0;y<SH;y+=16)sx.fillRect(x,y,2,2);
+      var blocks=[{w:120,c:'#ffd23e'},{w:104,c:'#ff5ec4'},{w:88,c:'#7fffd4'},{w:72,c:'#3ea6ff'},{w:52,c:'#ffd23e'}];
+      var by=SH-26,bh=18;
+      blocks.forEach(function(b,i){var off=Math.sin(tk*0.04+i)*(i*1.5);var bx=SW/2-b.w/2+off;sx.save();sx.shadowColor=b.c;sx.shadowBlur=8;sx.fillStyle=b.c;sx.fillRect(bx,by-i*(bh+2),b.w,bh);sx.fillStyle='rgba(255,255,255,0.25)';sx.fillRect(bx,by-i*(bh+2),b.w,3);sx.restore();});
+      var fx=SW/2-26+Math.sin(tk*0.05)*60;sx.save();sx.shadowColor='#ff5ec4';sx.shadowBlur=10;sx.fillStyle='#ff5ec4';sx.fillRect(fx,18,52,bh);sx.restore();
+
+      var g2=px2.createLinearGradient(0,0,0,PH);g2.addColorStop(0,'#1a1230');g2.addColorStop(1,'#0a0812');px2.fillStyle=g2;px2.fillRect(0,0,PW,PH);
+      px2.fillStyle='rgba(140,110,200,0.06)';for(var x2=0;x2<PW;x2+=16)for(var y2=0;y2<PH;y2+=16)px2.fillRect(x2,y2,2,2);
+      var rg=px2.createRadialGradient(PW/2,PH-30,10,PW/2,PH/2,PH*0.7);rg.addColorStop(0,'rgba(90,55,140,0.35)');rg.addColorStop(1,'rgba(0,0,0,0)');px2.fillStyle=rg;px2.fillRect(0,0,PW,PH);
+      dStar(px2,60,55,11,'#ffd84d','#ffd84d');dStar(px2,180,50,9,'#ffe27a','#fff');dStar(px2,150,95,8,'#ffd84d','#ffd84d');
+      var ang=-Math.PI/2+Math.sin(tk*0.03)*0.9;var ccx=PW/2,ccy=PH-34;
+      px2.fillStyle='rgba(255,90,150,0.22)';for(var dd=18;dd<150;dd+=PX*3){var lx=ccx+Math.cos(ang)*dd,ly=ccy+Math.sin(ang)*dd;px2.fillRect(Math.round(lx/PX)*PX,Math.round(ly/PX)*PX,PX,PX);}
+      var bp=(tk%70)/70;var bx2=ccx+Math.cos(ang)*bp*130,by2=ccy+Math.sin(ang)*bp*130;dCirc(px2,bx2,by2,5,'#a0e8ff','#7fe0ff');px(px2,bx2-2,by2-2,'#fff');
+      cannonBody(px2,ccx,ccy,ang,'#ff5a96','#2e2640');
+    }
+    requestAnimationFrame(draw);}
+  draw();
 })();
 </script>
 
